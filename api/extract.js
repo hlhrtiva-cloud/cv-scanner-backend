@@ -1,6 +1,6 @@
 // api/extract.js
 const { verifyLicense } = require("../services/licenseService");
-const { mockExtract } = require("../services/aiEngine");
+const { extractWithGemini } = require("../services/geminiService");
 
 module.exports = async (req, res) => {
   if (req.method !== "POST") {
