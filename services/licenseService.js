@@ -1,53 +1,67 @@
-// services/licenseService.js
-const path = require("path");
 const fs = require("fs");
+const path = require("path");
 
 const LICENSES_FILE = path.join(__dirname, "..", "data", "licenses.json");
 
 function loadLicenses() {
-  const raw = fs.readFileSync(LICENSES_FILE, "utf8");
-  return JSON.parse(raw);
+  return JSON.parse(fs.readFileSync(LICENSES_FILE, "utf8"));
 }
 
-function verifyLicense(licenseKey, sheetId) {
-  const licenses = loadLicenses();
-  const license = licenses.find(
-    (lic) => lic.licenseKey === licenseKey && lic.active
-  );
+function saveLicenses(data) {
+  fs.writeFileSync(LICENSES_FILE, JSON.stringify(data, null, 2), "utf8");
+}
 
-  if (!license) {
+function getToday() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function verifyLicense(licenseKey, sheetId, increment = false) {
+  let licenses = loadLicenses();
+  let lic = licenses.find(l => l.licenseKey === licenseKey && l.active);
+
+  if (!lic) {
+    return { valid: false, reason: "LICENSE_NOT_FOUND" };
+  }
+
+  let now = new Date();
+  if (new Date(lic.expiresAt) < now) {
+    return { valid: false, reason: "LICENSE_EXPIRED" };
+  }
+
+  if (!lic.usage) lic.usage = {};
+  let today = getToday();
+  let usedToday = lic.usage[today] || 0;
+
+  if (usedToday >= lic.maxDailyCV) {
     return {
       valid: false,
-      reason: "LICENSE_NOT_FOUND"
+      reason: "QUOTA_EXCEEDED",
+      quota: {
+        usedToday,
+        limitToday: lic.maxDailyCV
+      }
     };
   }
 
-  const now = new Date();
-  const expiresAt = new Date(license.expiresAt);
-  if (expiresAt < now) {
-    return {
-      valid: false,
-      reason: "LICENSE_EXPIRED"
-    };
+  if (increment) {
+    lic.usage[today] = usedToday + 1;
+    saveLicenses(licenses);
   }
 
-  // Ở đây bước sau có thể track usage theo sheetId
   return {
     valid: true,
     customer: {
-      name: license.customerName,
-      email: license.email,
-      plan: license.plan,
-      expiresAt: license.expiresAt,
-      maxDailyCV: license.maxDailyCV
+      name: lic.customerName,
+      email: lic.email,
+      plan: lic.plan,
+      expiresAt: lic.expiresAt,
+      maxDailyCV: lic.maxDailyCV
     },
     quota: {
-      usedToday: 0,
-      limitToday: license.maxDailyCV
+      usedToday: lic.usage[today] || 0,
+      limitToday: lic.maxDailyCV
     }
   };
 }
 
-module.exports = {
-  verifyLicense
-};
+module.exports = { verifyLicense };
