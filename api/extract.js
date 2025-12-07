@@ -24,7 +24,8 @@ module.exports = async (req, res) => {
     return;
   }
 
-  const licResult = verifyLicense(licenseKey, sheetId);
+  const licResult = verifyLicense(licenseKey, sheetId, true);
+
   if (!licResult.valid) {
     res.status(200).json({
       ok: false,
