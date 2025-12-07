@@ -1,0 +1,11 @@
+[
+  {
+    "licenseKey": "DEMO-123-KEY",
+    "customerName": "Demo Company",
+    "email": "demo@company.com",
+    "plan": "PRO",
+    "maxDailyCV": 500,
+    "expiresAt": "2026-01-01",
+    "active": true
+  }
+]
