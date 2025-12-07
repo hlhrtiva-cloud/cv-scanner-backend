@@ -43,7 +43,7 @@ module.exports = async (req, res) => {
   }
 
   // 2) Tạm dùng mockExtract (chưa gọi Gemini)
-  const data = mockExtract(cvText, jdText || "");
+  const data = await extractWithGemini(cvText, jdText || "");
 
   res.status(200).json({
     ok: true,
