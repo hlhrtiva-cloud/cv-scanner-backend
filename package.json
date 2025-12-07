@@ -1,0 +1,13 @@
+{
+  "name": "cv-scanner-backend",
+  "version": "0.0.1",
+  "description": "Backend for CV Scanner Pro (Vercel serverless)",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vercel dev",
+    "start": "node api/version.js"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.21.0"
+  }
+}
