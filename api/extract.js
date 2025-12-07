@@ -13,14 +13,7 @@ module.exports = async (req, res) => {
   }
 
   const body = req.body || {};
-  const {
-    licenseKey,
-    sheetId,
-    userEmail,
-    cvText,
-    jdText,
-    locale
-  } = body;
+  const { licenseKey, sheetId, cvText, jdText } = body;
 
   if (!licenseKey || !sheetId || !cvText) {
     res.status(400).json({
@@ -31,7 +24,6 @@ module.exports = async (req, res) => {
     return;
   }
 
-  // 1) Check license
   const licResult = verifyLicense(licenseKey, sheetId);
   if (!licResult.valid) {
     res.status(200).json({
@@ -42,19 +34,15 @@ module.exports = async (req, res) => {
     return;
   }
 
-  // 2) Tạm dùng mockExtract (chưa gọi Gemini)
+  // RUN GEMINI REAL
   const data = await extractWithGemini(cvText, jdText || "");
 
   res.status(200).json({
     ok: true,
     data,
     usage: {
-      model: "mock",
-      promptTokens: 0,
-      completionTokens: 0
+      model: "gemini-2.5-flash"
     },
-    cache: {
-      hit: false
-    }
+    cache: { hit: false }
   });
 };
