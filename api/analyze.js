@@ -1,6 +1,6 @@
 // api/analyze.js
 const { verifyLicense } = require("../services/licenseService");
-const { mockAnalyze } = require("../services/aiEngine");
+const { analyzeWithGemini } = require("../services/geminiService");
 
 module.exports = async (req, res) => {
   if (req.method !== "POST") {
@@ -43,7 +43,7 @@ module.exports = async (req, res) => {
   }
 
   // 2) Tạm mock analyze (chưa dùng Gemini)
-  const data = mockAnalyze(cv, jdText || "");
+  const data = await analyzeWithGemini(cv, jdText || "");
 
   res.status(200).json({
     ok: true,
